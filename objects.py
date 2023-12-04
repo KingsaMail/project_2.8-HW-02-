@@ -140,15 +140,133 @@ class GameBoard:
 class Player:
     """Класс игрока."""        
     
-    def __init__(self, ship_list:list) -> None:
+    def __init__(self, ship_list:list=None) -> None:
         self._ship_list:list = ship_list
         
     @property
     def ship_list(self):
         return self._ship_list
     
+    @ship_list.setter
+    def ship_list(self, ship_list:list):
+        self._ship_list:list = ship_list
+        
+        
+class Compucter():
+    "Класс компьютер."
+    
+    def __init__(self) -> None:        
+        self.field_start = [['O']*8 for i in range(8)]
+        self.field_c = [['O']*6 for i in range(6)]
+        
+    def player_field_c_set(self):
+        self.field_c = self.field_start[1:7][:]
+        var = 0
+        for i in self.field_c:
+            self.field_c[var] = self.field_c[var][1:7]
+            var+=1
+        
+    #рисуем игровое поле компьютера (метод для отладки игры)    
+    def board_drow(self, name:str): #name - это или игрока или компьютера
+        print(f'\n    Поле {name}')
+        print(f"        {1}   {2}   {3}   {4}   {5}   {6}")
+        my_list = [' а(f)', ' б(,)', ' в(d)', ' г(u)', ' д(l)', ' е(t)']
+        for i, lit in zip(self.field_c, my_list):
+            print(lit, end="")
+            for j in i:
+                print(' |', j, end='')
+            print(' |')
+            
+            
+            
+    def initial_ship_comp(self):
+        #ставим корабли компютера.
+        ship_list_project = [['первый', 3], ["второй", 2], ["третий", 2], ["четвёртый", 1], ["пятый", 1], ["шестой", 1], ["седьмой", 1]]
+        count = 0
+        while ship_list_project:
+            count+=1 # счётчик контроля зацикливания
+            #генерим точку и направление для стартовой позиции корабля
+            x, y, vec = randint(1,6), randint(1,6), randint(0,3)
+            
+            #если зацикливается, сбрасываем поле и генерируем заново
+            if count == 50: 
+                ship_list_project = [['первый', 3], ["второй", 2], ["третий", 2], ["четвёртый", 1], ["пятый", 1], ["шестой", 1], ["седьмой", 1]]
+                count = 0
+                self.field_start = [['O']*8 for i in range(8)]
+                continue
+            
+            # если нельзя ставить в это место корабль, то перезапускаем итерацию                
+            if self.field_start[x][y] != 'O':
+                continue
+            
+            # временный список, для координат кораблей
+            ship_var = []
+            ship_var.append((x,y))            
+            for i in range(ship_list_project[0][1]-1):  
+                # добавляем координаты если выпало по вертикали              
+                if (vec==0) and (i==0):
+                    xi = x - 1 if (x-1)>0 else x + 1
+                    ship_var.append((xi,y))
+                if (vec==2) and (i==0):
+                    xi = x + 1 if (x+1)<7 else x - 1
+                    ship_var.append((xi,y))
+                if (vec==0) and (i==1):
+                    xi = xi - 1 if (xi-1)>0 else xi + 2
+                    ship_var.append((xi,y))
+                if (vec==2) and (i==1):
+                    xi = xi + 1 if (xi+1)<7 else xi - 2
+                    ship_var.append((xi,y))
+                # добавляем координаты если выпало по горизонтали
+                if (vec==1) and (i==0):
+                    yi = y - 1 if (y-1)>0 else y + 1
+                    ship_var.append((x,yi))
+                if (vec==3) and (i==0):
+                    yi = y + 1 if (y+1)<7 else y - 1
+                    ship_var.append((x,yi))
+                if (vec==1) and (i==1):
+                    yi = yi - 1 if (yi-1)>0 else yi + 2
+                    ship_var.append((x,yi))
+                if (vec==3) and (i==1):
+                    yi = yi + 1 if (yi+1)<7 else yi - 2
+                    ship_var.append((x,yi))
+                else:
+                    continue
+            
+            #если в этих координатах нельзя ставить корабль, то список кораблей не меняется
+            #и корабль создаётся заново
+            flag = True
+            for i in ship_var:
+                if self.field_start[i[0]][i[1]] != "O":
+                    flag = False
+            
+            
+            if flag:
+                #окружаем все точки корабля запретной зоной
+                for i in ship_var:
+                    self.field_start[i[0]][i[1]+1] = "o"
+                    self.field_start[i[0]+1][i[1]+1] = "o"
+                    self.field_start[i[0]+1][i[1]] = "o"
+                    self.field_start[i[0]+1][i[1]-1] = "o"
+                    self.field_start[i[0]][i[1]-1] = "o"
+                    self.field_start[i[0]-1][i[1]-1] = "o"
+                    self.field_start[i[0]-1][i[1]] = "o"
+                    self.field_start[i[0]-1][i[1]+1] = "o"
+                
+                #ставим корабль
+                for i in ship_var:
+                    self.field_start[i[0]][i[1]] = '#'
+                
+                #добавляем в список жизни
+                ship_var.append(ship_list_project[0][1])
+                #берём следующий по списку корабль
+                ship_list_project.pop(0)                   
+                
+        #возвращаем список кораблей, через метод экземпляра        
+        Compucter.player_field_c_set(self)   
        
         
 if __name__ == '__main__':
-    draft = GameBoard()
-    draft.board_drow('игрока')
+    comp = Compucter()
+    #print(comp.ship_list)    
+    comp.initial_ship_comp()
+    comp.board_drow('инициализации')
