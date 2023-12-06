@@ -257,8 +257,8 @@ class Compucter():
                     self.field_start[i[0]][i[1]] = '#'
                 
                 #добавляем в список жизни
-                ship_var.append(ship_list_project[0][1])
-                #берём следующий по списку корабль
+                #ship_var.append(ship_list_project[0][1])    !!!!!            
+                #берём следующий по списку корабль                
                 ship_list_project.pop(0)                   
                 
         #возвращаем список кораблей, через метод экземпляра        
@@ -266,7 +266,6 @@ class Compucter():
        
         
 if __name__ == '__main__':
-    comp = Compucter()
-    #print(comp.ship_list)    
+    comp = Compucter()        
     comp.initial_ship_comp()
     comp.board_drow('инициализации')
